@@ -55,16 +55,12 @@ def get_all_courses(conn):
 def save_lesson(conn, lesson):
     with conn.cursor(cursor_factory=NamedTupleCursor) as cur:
         if lesson.id is None:
-            cur.execute(
-                "INSERT INTO lessons (name, text, course_id) VALUES (%s, %s, %s) RETURNING id;",
-                (lesson.name, lesson.text, lesson.course_id)
-            )
+            cur.execute('''INSERT INTO lessons (name, text, course_id)
+            VALUES (%s, %s, %s) RETURNING id''', (lesson.name, lesson.text, lesson.course_id))
             lesson.id = cur.fetchone().id
         else:
-            cur.execute(
-                "UPDATE lessons SET name = %s, text = %s, course_id = %s WHERE id = %s;",
-                (lesson.name, lesson.text, lesson.course_id, lesson.id)
-            )
+            cur.execute('''UPDATE lessons SET id = %s, name = %s, text = %s WHERE course_id = %s
+            RETURNING id''', (lesson.id, lesson.name, lesson.text, lesson.course_id))
     return lesson.id
 
 def find_lesson(conn, lesson_id):
@@ -76,8 +72,8 @@ def find_lesson(conn, lesson_id):
                 id=result.id,
                 name=result.name,
                 text=result.text,
-                course_id=result.course_id
-            )
+                course_id = result.course_id
+                )
     return None
 
 def get_course_lessons(conn, course_id):
@@ -89,7 +85,7 @@ def get_course_lessons(conn, course_id):
                 id=row.id,
                 name=row.name,
                 text=row.text,
-                course_id=row.course_id
-            ))
-    return lessons
+                course_id = row.course_id
+                ))
+        return lessons
 # END
